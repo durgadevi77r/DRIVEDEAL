@@ -1,0 +1,54 @@
+/* Form Submission Overlay - Blur + Centered Animation */
+.form-submission-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: formOverlayFadeIn 0.3s ease-out;
+}
+
+.form-submission-overlay.fade-out {
+  animation: formOverlayFadeOut 0.3s ease-in forwards;
+}
+
+.form-submission-overlay-animation {
+  width: 340px;
+  height: 340px;
+  animation: formOverlayScaleIn 0.4s ease-out;
+}
+
+.form-submission-overlay.fade-out .form-submission-overlay-animation {
+  animation: formOverlayScaleOut 0.3s ease-in forwards;
+}
+
+@keyframes formOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes formOverlayFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes formOverlayScaleIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes formOverlayScaleOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.9); }
+}
+
+@media (min-width: 768px) {
+  .form-submission-overlay-animation {
+    width: 400px;
+    height: 400px;
+  }
+}
