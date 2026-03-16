@@ -111,11 +111,18 @@ const carSchema = new mongoose.Schema({
   model: { type: String, required: true },
   year: { type: Number, required: true },
   fuelType: { type: String, required: true },
+  transmissionType: { type: String, enum: ['Manual', 'Automatic'], default: 'Manual' },
+  bodyType: { type: String },
   color: { type: String, required: true },
   price: { type: Number, required: true },
   location: { type: String, required: true },
   kilometers: { type: Number, required: true },
   owners: { type: Number, required: true },
+  registrationRTO: { type: String },
+  seatingCapacity: { type: Number },
+  insuranceInfo: { type: String },
+  serviceHistory: { type: String },
+  condition: { type: String },
   description: { 
     en: { type: String },
     ta: { type: String },
@@ -155,9 +162,20 @@ const bookingSchema = new mongoose.Schema({
   customerName: { type: String, required: true },
   customerPhone: { type: String, required: true },
   customerEmail: { type: String, required: true },
+  customerAddress: { type: String, required: true },
+  customerDistrict: { type: String, required: true },
+  customerState: { type: String, required: true },
+  customerCountry: { type: String, required: true },
   bookingDate: { type: Date, default: Date.now },
-  visitDate: { type: Date },
-  status: { type: String, enum: ['pending', 'confirmed', 'completed', 'cancelled'], default: 'pending' }
+  visitDate: { type: Date, required: true },
+  visitTime: { type: String, required: true },
+  paymentPreference: { 
+    type: String, 
+    enum: ['Ready Cost', 'Initial Amount', 'No Payment (Visit Only)'],
+    required: true 
+  },
+  initialAmount: { type: Number },
+  status: { type: String, enum: ['Pending', 'Accepted', 'Cancelled'], default: 'Pending' }
 });
 
 const Booking = mongoose.model('Booking', bookingSchema);
@@ -186,13 +204,38 @@ const enquirySchema = new mongoose.Schema({
 
 const Enquiry = mongoose.model('Enquiry', enquirySchema);
 
+// Sold Car Schema
+const soldCarSchema = new mongoose.Schema({
+  carId: { type: mongoose.Schema.Types.ObjectId, ref: 'Car', required: true },
+  buyerName: { type: String, required: true },
+  buyerEmail: { type: String, required: true },
+  buyerPhone: { type: String, required: true },
+  buyerAddress: { type: String, required: true },
+  buyerDistrict: { type: String, required: true },
+  buyerState: { type: String, required: true },
+  buyerCountry: { type: String, required: true },
+  carName: { type: String, required: true },
+  carModel: { type: String, required: true },
+  salePrice: { type: Number, required: true },
+  saleDate: { type: Date, required: true },
+  paymentMethod: { type: String, required: true },
+  additionalNotes: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const SoldCar = mongoose.model('SoldCar', soldCarSchema);
+
 
 // --- API Endpoints ---
 
 // Car Management Endpoints
 app.post('/api/cars', upload.array('images', 10), async (req, res) => {
   try {
-    const { brand, model, year, fuelType, color, price, location, kilometers, owners, description } = req.body;
+    const { 
+      brand, model, year, fuelType, color, price, location, kilometers, owners, 
+      description, transmissionType, bodyType, registrationRTO, seatingCapacity, 
+      insuranceInfo, serviceHistory, condition 
+    } = req.body;
     
     let parsedDescription = description;
     try {
@@ -210,6 +253,8 @@ app.post('/api/cars', upload.array('images', 10), async (req, res) => {
     const newCar = new Car({
       brand, model, year, fuelType, color, price, location, kilometers, owners, 
       description: parsedDescription,
+      transmissionType, bodyType, registrationRTO, seatingCapacity, 
+      insuranceInfo, serviceHistory, condition,
       images,
       primaryImage
     });
@@ -492,6 +537,9 @@ app.get('/api/cars/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Car not found' });
         }
         
+        // Count bookings for this car
+        const bookingCount = await Booking.countDocuments({ carId: req.params.id });
+        
         // Fetch related cars (same brand, similar price)
         const relatedCars = await Car.find({
             _id: { $ne: car._id },
@@ -499,7 +547,7 @@ app.get('/api/cars/:id', async (req, res) => {
             price: { $gte: car.price * 0.8, $lte: car.price * 1.2 }
         }).limit(4);
 
-        res.json({ success: true, data: car, related: relatedCars });
+        res.json({ success: true, data: car, related: relatedCars, bookingCount });
     } catch (error) {
         console.error('Error fetching car details:', error);
         res.status(500).json({ success: false, message: 'Server error fetching car details' });
@@ -558,6 +606,23 @@ app.get('/api/bookings', async (req, res) => {
     } catch (error) {
         console.error('Error fetching bookings:', error);
         res.status(500).json({ success: false, message: 'Server error fetching bookings' });
+    }
+});
+
+app.put('/api/bookings/:id/status', async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (!['Pending', 'Accepted', 'Cancelled'].includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status' });
+        }
+        const booking = await Booking.findByIdAndUpdate(req.params.id, { status }, { new: true });
+        if (!booking) {
+            return res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+        res.json({ success: true, message: `Booking status updated to ${status}`, data: booking });
+    } catch (error) {
+        console.error('Error updating booking status:', error);
+        res.status(500).json({ success: false, message: 'Server error updating booking status' });
     }
 });
 
@@ -882,6 +947,50 @@ app.put('/api/enquiries/:id/status', async (req, res) => {
   }
 });
 
+// Sold Car Endpoints
+app.post('/api/sold-cars', async (req, res) => {
+    try {
+        const { carId, buyerName, buyerEmail, buyerPhone, buyerAddress, buyerDistrict, buyerState, buyerCountry, carName, carModel, salePrice, saleDate, paymentMethod, additionalNotes } = req.body;
+        
+        // Create sold car record
+        const soldCar = new SoldCar({
+            carId, buyerName, buyerEmail, buyerPhone, buyerAddress, buyerDistrict, buyerState, buyerCountry, carName, carModel, salePrice, saleDate, paymentMethod, additionalNotes
+        });
+        await soldCar.save();
+
+        // Update car status to sold
+        await Car.findByIdAndUpdate(carId, { status: 'sold' });
+
+        res.status(201).json({ success: true, message: 'Car marked as sold and record saved', data: soldCar });
+    } catch (error) {
+        console.error('Error saving sold car record:', error);
+        res.status(500).json({ success: false, message: 'Server error saving sold car record' });
+    }
+});
+
+app.get('/api/sold-cars', async (req, res) => {
+    try {
+        const soldCars = await SoldCar.find().populate('carId').sort({ saleDate: -1 });
+        res.json({ success: true, data: soldCars });
+    } catch (error) {
+        console.error('Error fetching sold cars:', error);
+        res.status(500).json({ success: false, message: 'Server error fetching sold cars' });
+    }
+});
+
+app.get('/api/sold-cars/car/:carId', async (req, res) => {
+    try {
+        const soldCar = await SoldCar.findOne({ carId: req.params.carId });
+        if (!soldCar) {
+            return res.status(404).json({ success: false, message: 'Sold record not found for this car' });
+        }
+        res.json({ success: true, data: soldCar });
+    } catch (error) {
+        console.error('Error fetching sold car info:', error);
+        res.status(500).json({ success: false, message: 'Server error fetching sold car info' });
+    }
+});
+
 // Signup Endpoint
 app.post('/api/signup', async (req, res) => {
   try {
@@ -966,6 +1075,23 @@ app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    // Check for mock admin
+    if (email === 'drivedeal@admin.com' && password === 'admin123') {
+        let user = await User.findOne({ email: 'drivedeal@admin.com' });
+        if (!user) {
+            user = new User({
+                name: 'Admin',
+                email: 'drivedeal@admin.com',
+                phone: '0000000000',
+                password: 'admin123' // Not secure, but this is a mock
+            });
+            await user.save();
+        }
+        const userObj = user.toObject();
+        const { password, ...userWithoutPassword } = userObj;
+        return res.json({ success: true, user: userWithoutPassword });
+    }
+
     const user = await User.findOne({ email, password });
     
     if (user) {
@@ -981,6 +1107,29 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Mock Google Login Endpoint
+app.post('/api/login/google', async (req, res) => {
+    try {
+        const { email, name } = req.body;
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = new User({
+                name: name || 'Google User',
+                email: email,
+                phone: 'Not provided',
+                password: Math.random().toString(36).substring(7) // Random password for mock user
+            });
+            await user.save();
+        }
+        const userObj = user.toObject();
+        const { password, ...userWithoutPassword } = userObj;
+        res.json({ success: true, user: userWithoutPassword });
+    } catch (error) {
+        console.error('Error in Google login mock:', error);
+        res.status(500).json({ success: false, message: 'Server error during mock login' });
+    }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
@@ -993,6 +1142,15 @@ app.get('/api/health', (req, res) => {
 app.post('/api/wishlist', async (req, res) => {
     try {
         const { userId, carId } = req.body;
+        
+        if (!userId || !carId) {
+            return res.status(400).json({ success: false, message: 'User ID and Car ID are required' });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(carId)) {
+            return res.status(400).json({ success: false, message: 'Invalid User ID or Car ID format' });
+        }
+
         const exists = await Wishlist.findOne({ userId, carId });
         if (exists) {
             return res.status(400).json({ success: false, message: 'Already in wishlist' });
@@ -1002,27 +1160,35 @@ app.post('/api/wishlist', async (req, res) => {
         res.status(201).json({ success: true, message: 'Added to wishlist' });
     } catch (error) {
         console.error('Error adding to wishlist:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.status(500).json({ success: false, message: 'Server error: ' + error.message });
     }
 });
 
 app.get('/api/wishlist/:userId', async (req, res) => {
     try {
-        const items = await Wishlist.find({ userId: req.params.userId }).populate('carId');
+        const { userId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: 'Invalid User ID format' });
+        }
+        const items = await Wishlist.find({ userId }).populate('carId');
         res.json({ success: true, data: items });
     } catch (error) {
         console.error('Error fetching wishlist:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.status(500).json({ success: false, message: 'Server error fetching wishlist' });
     }
 });
 
 app.delete('/api/wishlist/:userId/:carId', async (req, res) => {
     try {
-        await Wishlist.findOneAndDelete({ userId: req.params.userId, carId: req.params.carId });
+        const { userId, carId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(carId)) {
+            return res.status(400).json({ success: false, message: 'Invalid ID format' });
+        }
+        await Wishlist.findOneAndDelete({ userId, carId });
         res.json({ success: true, message: 'Removed from wishlist' });
     } catch (error) {
         console.error('Error removing from wishlist:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.status(500).json({ success: false, message: 'Server error removing from wishlist' });
     }
 });
 

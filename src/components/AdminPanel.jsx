@@ -6,8 +6,9 @@ import CarManagement from './admin/CarManagement';
 import UserManagement from './admin/UserManagement';
 import BookingManagement from './admin/BookingManagement';
 import EnquiryManagement from './admin/EnquiryManagement';
+import SoldCarManagement from './admin/SoldCarManagement';
 import './AdminPanel.css';
-import { HomeIcon, DriveDealLogoIcon, AdminIcon, EmailIcon, SettingsIcon } from './Icons';
+import { HomeIcon, DriveDealLogoIcon, AdminIcon, EmailIcon, SettingsIcon, CalendarIcon } from './Icons';
 
 const AdminPanel = () => {
   const { isAdmin, isAuthenticated, loading } = useAuth();
@@ -37,6 +38,8 @@ const AdminPanel = () => {
         return <UserManagement />;
       case 'bookings':
         return <BookingManagement />;
+      case 'sold':
+        return <SoldCarManagement />;
       case 'enquiries':
         return <EnquiryManagement />;
       default:
@@ -79,6 +82,15 @@ const AdminPanel = () => {
               <SettingsIcon className="nav-icon-svg" fill="currentColor" />
             </span>
             <span className="nav-label">Bookings</span>
+          </button>
+          <button 
+            className={`nav-item ${activeTab === 'sold' ? 'active' : ''}`}
+            onClick={() => setActiveTab('sold')}
+          >
+            <span className="nav-icon">
+              <CalendarIcon className="nav-icon-svg" fill="currentColor" />
+            </span>
+            <span className="nav-label">Sold Cars</span>
           </button>
           <button 
             className={`nav-item ${activeTab === 'enquiries' ? 'active' : ''}`}

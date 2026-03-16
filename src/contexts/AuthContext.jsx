@@ -74,17 +74,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const adminLogin = (email, password) => {
-    if (email === 'drivedeal@admin.com' && password === 'admin123') {
-      const adminUser = {
-        name: 'Admin',
-        email: 'drivedeal@admin.com',
-        role: 'admin',
-      };
-      login(adminUser, true);
-      return { success: true };
+  const adminLogin = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        login(data.user, true);
+        return { success: true };
+      }
+      return { success: false, error: 'invalidCredentials' };
+    } catch (error) {
+      return { success: false, error: 'serverError' };
     }
-    return { success: false, error: 'invalidCredentials' };
   };
 
   const logout = () => {
@@ -101,14 +106,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = () => {
-    // Simulate Google login - in production, integrate with Google OAuth
-    const googleUser = {
-      name: 'Google User',
-      email: 'user@gmail.com',
-      avatar: null,
-    };
-    login(googleUser, false);
+  const loginWithGoogle = async () => {
+    try {
+      // Simulate Google login by calling the mock backend endpoint
+      const googleData = {
+        name: 'Google User',
+        email: 'user@gmail.com',
+      };
+      const response = await fetch('http://localhost:5000/api/login/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(googleData),
+      });
+      const data = await response.json();
+      if (data.success) {
+        login(data.user, false);
+      }
+    } catch (error) {
+      console.error('Error in mock Google login:', error);
+    }
   };
 
   const getUserInitial = () => {

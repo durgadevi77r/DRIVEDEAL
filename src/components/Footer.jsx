@@ -21,7 +21,7 @@ const Footer = () => {
             </div>
             <div className="footer-top-text">
               <h4>{t('showroomAddress')}</h4>
-              <span>123 Car Street, Auto City, State - 123456</span>
+              <span>Near New Bus Stand, Madathupalayam Road, Perundurai – 638 052</span>
             </div>
           </div>
           <div className="footer-top-item">
@@ -30,7 +30,7 @@ const Footer = () => {
             </div>
             <div className="footer-top-text">
               <h4>{t('phone')}</h4>
-              <span>+91 98765 43210</span>
+              <span>+91 98429 24259 / 90250 25105</span>
             </div>
           </div>
           <div className="footer-top-item">
@@ -39,7 +39,7 @@ const Footer = () => {
             </div>
             <div className="footer-top-text">
               <h4>{t('email')}</h4>
-              <span>info@drivedeal.com</span>
+              <span>vr9842924529@gmail.com</span>
             </div>
           </div>
         </div>
@@ -48,10 +48,9 @@ const Footer = () => {
         <div className="footer-content">
           {/* Brand / About + Social */}
           <div className="footer-column brand-column">
-            <h3 className="footer-title">DRIVEDEAL</h3>
+            <h3 className="footer-title">AP AUTO CARE</h3>
             <p className="footer-text brand-desc">
-              Your trusted partner for buying and selling quality second-hand cars.
-              Transparent deals, verified sellers, and premium service.
+              Owned by Vignesh T. Your trusted partner for quality second-hand cars with 10+ years of industry experience.
             </p>
             <div className="footer-social">
               <span className="footer-social-label">{t('followUs')}</span>
@@ -104,7 +103,7 @@ const Footer = () => {
         {/* Bottom row */}
         <div className="footer-bottom">
           <p className="footer-bottom-text">
-            &copy; {new Date().getFullYear()} DRIVEDEAL. {t('allRightsReserved')}.
+            &copy; {new Date().getFullYear()} AP AUTO CARE. {t('allRightsReserved')}.
           </p>
           <ul className="footer-bottom-menu">
             <li><a href="#home">Home</a></li>

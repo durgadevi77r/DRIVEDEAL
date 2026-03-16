@@ -225,8 +225,35 @@
 
 .car-image-container {
     position: relative;
-    height: 240px; /* Taller images */
+    height: 220px;
     overflow: hidden;
+}
+
+.wishlist-toggle-icon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+.wishlist-toggle-icon:hover {
+    background: rgba(0, 0, 0, 0.5);
+    transform: scale(1.1);
+}
+
+.heart-icon-outline, .heart-icon-filled {
+    width: 22px;
+    height: 22px;
 }
 
 .car-image {
@@ -305,6 +332,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    /* margin-top: -25px; */
 }
 
 .view-details-btn::after {

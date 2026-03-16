@@ -10,6 +10,7 @@ import CarDetails from './components/CarDetails';
 import EnquiryPage from './components/EnquiryPage';
 import AdminPanel from './components/AdminPanel';
 import Profile from './components/Profile';
+import Wishlist from './components/Wishlist';
 import './App.css';
 
 function AppContent() {
@@ -25,6 +26,7 @@ function AppContent() {
         <Route path="/cars/:id" element={<CarDetails />} />
         <Route path="/enquiry" element={<EnquiryPage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </div>

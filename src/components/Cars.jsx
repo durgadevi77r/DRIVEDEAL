@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import './Cars.css';
-import { FilterIcon } from './Icons';
+import { FilterIcon, WishlistIcon, WishlistFillIcon } from './Icons';
 
 const Cars = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [cars, setCars] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterOptions, setFilterOptions] = useState({
     brands: [],
@@ -42,6 +45,59 @@ const Cars = () => {
   useEffect(() => {
     fetchCars();
   }, [filters]);
+
+  useEffect(() => {
+    if (isAuthenticated && user?._id) {
+      fetchWishlist();
+    } else {
+      setWishlist([]);
+    }
+  }, [isAuthenticated, user]);
+
+  const fetchWishlist = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/wishlist/${user._id}`);
+      const data = await response.json();
+      if (data.success) {
+        setWishlist(data.data.map(item => item.carId._id || item.carId));
+      }
+    } catch (err) {
+      console.error('Error fetching wishlist:', err);
+    }
+  };
+
+  const toggleWishlist = async (e, carId) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      alert(t('loginRequired') || 'Please login to manage your wishlist');
+      return;
+    }
+
+    const isWishlisted = wishlist.includes(carId);
+    try {
+      if (isWishlisted) {
+        const res = await fetch(`http://localhost:5000/api/wishlist/${user._id}/${carId}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.success) {
+          setWishlist(prev => prev.filter(id => id !== carId));
+        }
+      } else {
+        const res = await fetch('http://localhost:5000/api/wishlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user._id, carId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setWishlist(prev => [...prev, carId]);
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling wishlist:', err);
+    }
+  };
 
   const fetchFilterOptions = async () => {
     try {
@@ -284,6 +340,13 @@ const Cars = () => {
                         loading="lazy"
                       />
                       {getStatusBadge(car.status)}
+                      <div className="wishlist-toggle-icon" onClick={(e) => toggleWishlist(e, car._id)}>
+                        {wishlist.includes(car._id) ? (
+                          <WishlistFillIcon className="heart-icon-filled" fill="#ef4444" />
+                        ) : (
+                          <WishlistIcon className="heart-icon-outline" fill="white" />
+                        )}
+                      </div>
                     </div>
                     <div className="car-details">
                       <h3 className="car-title">{car.brand} {car.model}</h3>

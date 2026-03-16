@@ -192,6 +192,24 @@ const Navbar = () => {
     setIsLanguageMenuOpen(false);
   };
 
+  const scrollToSection = (sectionId) => {
+    if (window.location.pathname !== '/') {
+      navigate(`/#${sectionId}`);
+      return;
+    }
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const navHeight = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <>
       <div className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} onClick={closeSidebar}></div>
@@ -205,8 +223,8 @@ const Navbar = () => {
           <a href="#" onClick={(e) => { e.preventDefault(); navigate('/cars'); closeSidebar(); }} className="sidebar-link">{t('cars')}</a>
           {/* <a href="#compare" onClick={closeSidebar} className="sidebar-link">{t('compare')}</a> */}
           <a href="#" onClick={(e) => { e.preventDefault(); navigate('/enquiry'); closeSidebar(); }} className="sidebar-link">{t('customerEnquiry')}</a>
-          <a href="#about" onClick={closeSidebar} className="sidebar-link">{t('about')}</a>
-          <a href="#contact" onClick={closeSidebar} className="sidebar-link">{t('contact')}</a>
+          <a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); closeSidebar(); }} className="sidebar-link">{t('about')}</a>
+          <a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); closeSidebar(); }} className="sidebar-link">{t('contact')}</a>
           <div className="sidebar-divider"></div>
           {!isAuthenticated ? (
             <>
@@ -226,7 +244,7 @@ const Navbar = () => {
             <button className="menu-toggle-btn" onClick={toggleSidebar} aria-label="Toggle Menu">
               <MenuIcon className="menu-icon-svg" />
             </button>
-            <div className="navbar-logo">
+            <div className="navbar-logo" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
             <span className="logo-icon-text"></span>
             <div className="logo-text">
               <span className="logo-full">DRIVEDEAL</span>
@@ -253,20 +271,23 @@ const Navbar = () => {
           <div className="navbar-actions">
             {/* Theme Toggle */}
             <button
-              className="icon-btn"
+              className="icon-btn theme-toggle-btn"
               onClick={toggleTheme}
               aria-label={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
               title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
             >
               {theme === 'light' ? (
-                <MoonIcon className="icon-svg" />
+                <MoonIcon className="icon-svg large-icon" />
               ) : (
-                <SunIcon className="icon-svg" />
+                <SunIcon className="icon-svg large-icon" />
               )}
             </button>
 
+            {/* Google Translate Container */}
+            <div id="google_translate_element" className="google-translate-container"></div>
+
             {/* Language Selector */}
-            <div className="language-selector" ref={languageMenuRef}>
+            {/* <div className="language-selector" ref={languageMenuRef}>
               <button
                 className="language-btn"
                 onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
@@ -292,38 +313,18 @@ const Navbar = () => {
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Notifications Icon */}
-            {/* {isAuthenticated && (
-              <button className="icon-btn" aria-label={t('notifications')}>
-                <span className="icon-text">🔔</span>
-                <span className="notification-badge">3</span>
-              </button>
-            )} */}
-            
-            {/* Admin Panel Icon */}
-            {/* {isAuthenticated && isAdmin && (
-              <button
-                className="icon-btn admin-icon"
-                onClick={() => navigate('/admin')}
-                aria-label={t('adminPanel')}
-                title={t('adminPanel')}
-              >
-                <AdminIcon className="icon-svg" fill="currentColor" />
-              </button>
-            )} */}
+            </div> */}
 
             {/* Wishlist Icon */}
             {isAuthenticated && (
-              <a
-                href="#wishlist"
-                className="icon-btn"
+              <button
+                className="icon-btn wishlist-btn"
+                onClick={() => navigate('/wishlist')}
                 aria-label={t('wishlist')}
                 title={t('wishlist')}
               >
-                <WishlistIcon className="icon-svg" fill="currentColor" />
-              </a>
+                <WishlistIcon className="icon-svg large-icon" fill="currentColor" />
+              </button>
             )}
 
             {/* User Menu or Login/Signup */}
@@ -353,14 +354,16 @@ const Navbar = () => {
                       </div>
                     </div>
                     <div className="dropdown-divider"></div>
-                    <a
-                      href="#wishlist"
-                      className="dropdown-item1"
-                      onClick={() => setIsUserMenuOpen(false)}
+                    <button
+                      className="dropdown-item"
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        navigate('/wishlist');
+                      }}
                     >
                       <WishlistIcon className="dropdown-icon-svg" fill="currentColor" />
                       <span>{t('wishlist')}</span>
-                    </a>
+                    </button>
                     <button
                       className="dropdown-item"
                       onClick={() => {

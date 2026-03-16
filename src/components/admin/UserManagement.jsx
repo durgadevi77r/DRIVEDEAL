@@ -17,6 +17,8 @@ const UserManagement = () => {
   // Modal State
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userWishlist, setUserWishlist] = useState([]);
+  const [loadingWishlist, setLoadingWishlist] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -94,8 +96,25 @@ const UserManagement = () => {
     setDateFilter({ startDate: '', endDate: '' });
   };
 
+  const fetchUserWishlist = async (userId) => {
+    try {
+      setLoadingWishlist(true);
+      const response = await fetch(`http://localhost:5000/api/wishlist/${userId}`);
+      const data = await response.json();
+      if (data.success) {
+        setUserWishlist(data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching user wishlist:', err);
+    } finally {
+      setLoadingWishlist(false);
+    }
+  };
+
   const openDetailModal = (user) => {
     setSelectedUser(user);
+    setUserWishlist([]);
+    fetchUserWishlist(user._id);
     setIsModalOpen(true);
     document.body.style.overflow = 'hidden';
   };
@@ -268,6 +287,47 @@ const UserManagement = () => {
                                 </span>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="detail-section">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h3>User Wishlist</h3>
+                            <span className="admin-badge" style={{ backgroundColor: 'var(--primary-light)', color: 'var(--primary-color)' }}>
+                                {userWishlist.length} {userWishlist.length === 1 ? 'item' : 'items'}
+                            </span>
+                        </div>
+                        
+                        {loadingWishlist ? (
+                            <div style={{ textAlign: 'center', padding: '20px' }}><div className="spinner"></div></div>
+                        ) : userWishlist.length > 0 ? (
+                            <div className="wishlist-admin-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+                                {userWishlist.map((item) => {
+                                    const car = item.carId;
+                                    if (!car) return null;
+                                    return (
+                                        <div key={item._id} className="wishlist-admin-item" style={{ border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden', background: 'var(--bg-body)' }}>
+                                            <div style={{ height: '120px', overflow: 'hidden' }}>
+                                                <img 
+                                                    src={car.primaryImage ? `http://localhost:5000/${car.primaryImage}` : 'https://via.placeholder.com/200x120?text=No+Image'} 
+                                                    alt={car.model} 
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
+                                            </div>
+                                            <div style={{ padding: '10px' }}>
+                                                <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{car.brand} {car.model}</div>
+                                                <div style={{ color: 'var(--primary)', fontWeight: '700', fontSize: '0.85rem', marginTop: '4px' }}>
+                                                    ₹{car.price?.toLocaleString()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center', padding: '20px' }}>
+                                This user has no cars in their wishlist.
+                            </p>
+                        )}
                     </div>
                 </div>
                 <div className="modal-footer" style={{ padding: '24px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end' }}>

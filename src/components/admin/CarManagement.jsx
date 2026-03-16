@@ -23,11 +23,20 @@ const CarManagement = () => {
   // Modal State
   const [selectedCar, setSelectedCar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSoldModalOpen, setIsSoldModalOpen] = useState(false);
   
   // Form State
   const [formData, setFormData] = useState({
     brand: '', model: '', year: '', fuelType: '', color: '',
-    price: '', location: '', kilometers: '', owners: '', description: ''
+    price: '', location: '', kilometers: '', owners: '', description: '',
+    transmissionType: 'Manual', bodyType: '', registrationRTO: '',
+    seatingCapacity: '', insuranceInfo: '', serviceHistory: '', condition: ''
+  });
+  const [soldFormData, setSoldFormData] = useState({
+    buyerName: '', buyerEmail: '', buyerPhone: '', buyerAddress: '',
+    buyerDistrict: '', buyerState: '', buyerCountry: 'India',
+    salePrice: '', saleDate: new Date().toISOString().split('T')[0],
+    paymentMethod: 'Cash', additionalNotes: ''
   });
   const [previewImages, setPreviewImages] = useState([]);
 
@@ -55,6 +64,42 @@ const CarManagement = () => {
       setError('Error connecting to server. Please ensure the backend is running.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSoldSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        const payload = {
+            ...soldFormData,
+            carId: selectedCar._id,
+            carName: selectedCar.brand,
+            carModel: selectedCar.model,
+            salePrice: Number(soldFormData.salePrice)
+        };
+
+        const response = await fetch('http://localhost:5000/api/sold-cars', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.success) {
+            alert('Car marked as sold successfully!');
+            setIsSoldModalOpen(false);
+            fetchCars();
+            setSoldFormData({
+                buyerName: '', buyerEmail: '', buyerPhone: '', buyerAddress: '',
+                buyerDistrict: '', buyerState: '', buyerCountry: 'India',
+                salePrice: '', saleDate: new Date().toISOString().split('T')[0],
+                paymentMethod: 'Cash', additionalNotes: ''
+            });
+        } else {
+            alert('Failed to mark as sold: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error marking car as sold:', error);
+        alert('Error marking car as sold');
     }
   };
 
@@ -113,6 +158,10 @@ const CarManagement = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleSoldInputChange = (e) => {
+    setSoldFormData({ ...soldFormData, [e.target.name]: e.target.value });
+  };
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const newImages = files.map(file => ({
@@ -148,7 +197,9 @@ const CarManagement = () => {
         setShowAddForm(false);
         setFormData({
             brand: '', model: '', year: '', fuelType: '', color: '',
-            price: '', location: '', kilometers: '', owners: '', description: ''
+            price: '', location: '', kilometers: '', owners: '', description: '',
+            transmissionType: 'Manual', bodyType: '', registrationRTO: '',
+            seatingCapacity: '', insuranceInfo: '', serviceHistory: '', condition: ''
         });
         setPreviewImages([]);
         fetchCars();
@@ -261,6 +312,39 @@ const CarManagement = () => {
             <div className="form-group">
                 <label className="form-label">Number of Owners</label>
                 <input type="number" name="owners" className="form-input" value={formData.owners} onChange={handleInputChange} required />
+            </div>
+
+            {/* New Fields */}
+            <div className="form-group">
+                <label className="form-label">Transmission Type</label>
+                <select name="transmissionType" className="form-input" value={formData.transmissionType} onChange={handleInputChange} required>
+                    <option value="Manual">Manual</option>
+                    <option value="Automatic">Automatic</option>
+                </select>
+            </div>
+            <div className="form-group">
+                <label className="form-label">Body Type (e.g., SUV, Sedan)</label>
+                <input type="text" name="bodyType" className="form-input" value={formData.bodyType} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+                <label className="form-label">Registration (RTO)</label>
+                <input type="text" name="registrationRTO" className="form-input" value={formData.registrationRTO} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+                <label className="form-label">Seating Capacity</label>
+                <input type="number" name="seatingCapacity" className="form-input" value={formData.seatingCapacity} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+                <label className="form-label">Insurance Info</label>
+                <input type="text" name="insuranceInfo" className="form-input" value={formData.insuranceInfo} onChange={handleInputChange} placeholder="e.g., Valid until Dec 2026" />
+            </div>
+            <div className="form-group">
+                <label className="form-label">Service History</label>
+                <input type="text" name="serviceHistory" className="form-input" value={formData.serviceHistory} onChange={handleInputChange} placeholder="e.g., Full service history available" />
+            </div>
+            <div className="form-group">
+                <label className="form-label">Condition Details</label>
+                <input type="text" name="condition" className="form-input" value={formData.condition} onChange={handleInputChange} placeholder="e.g., Like new, single hand driven" />
             </div>
             
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
@@ -479,7 +563,7 @@ const CarManagement = () => {
                                 )}
                             </>
                         )}
-                        <button className="action-btn btn-delete" onClick={() => updateStatus(car._id, 'sold')} title="Mark as Sold">
+                        <button className="action-btn btn-delete" onClick={() => { setSelectedCar(car); setSoldFormData({...soldFormData, salePrice: car.price}); setIsSoldModalOpen(true); }} title="Mark as Sold">
                              Sold
                         </button>
                         <button className="action-btn btn-delete" onClick={() => deleteCar(car._id)} title="Delete Car">
@@ -570,6 +654,34 @@ const CarManagement = () => {
                                 <span className="detail-value">{selectedCar.location}</span>
                             </div>
                             <div className="detail-item">
+                                <span className="detail-label">Transmission</span>
+                                <span className="detail-value">{selectedCar.transmissionType || 'Manual'}</span>
+                            </div>
+                            <div className="detail-item">
+                                <span className="detail-label">Body Type</span>
+                                <span className="detail-value">{selectedCar.bodyType || 'N/A'}</span>
+                            </div>
+                            <div className="detail-item">
+                                <span className="detail-label">Registration (RTO)</span>
+                                <span className="detail-value">{selectedCar.registrationRTO || 'N/A'}</span>
+                            </div>
+                            <div className="detail-item">
+                                <span className="detail-label">Seating Capacity</span>
+                                <span className="detail-value">{selectedCar.seatingCapacity || 'N/A'}</span>
+                            </div>
+                            <div className="detail-item">
+                                <span className="detail-label">Insurance</span>
+                                <span className="detail-value">{selectedCar.insuranceInfo || 'N/A'}</span>
+                            </div>
+                            <div className="detail-item">
+                                <span className="detail-label">Service History</span>
+                                <span className="detail-value">{selectedCar.serviceHistory || 'N/A'}</span>
+                            </div>
+                            <div className="detail-item">
+                                <span className="detail-label">Condition</span>
+                                <span className="detail-value">{selectedCar.condition || 'N/A'}</span>
+                            </div>
+                            <div className="detail-item">
                                 <span className="detail-label">Status</span>
                                 <div>
                                     <span className={`status-badge status-${selectedCar.status}`}>
@@ -593,10 +705,101 @@ const CarManagement = () => {
                     <button className="btn-secondary" onClick={closeDetailModal}>
                         Close
                     </button>
+                    {selectedCar.status !== 'sold' && (
+                        <button className="action-btn btn-delete" onClick={() => { setSoldFormData({...soldFormData, salePrice: selectedCar.price}); setIsSoldModalOpen(true); closeDetailModal(); }}>
+                            Mark as Sold
+                        </button>
+                    )}
                     <button className="action-btn btn-delete" onClick={() => { deleteCar(selectedCar._id); closeDetailModal(); }}>
                         Delete Vehicle
                     </button>
                 </div>
+            </div>
+        </div>
+      )}
+
+      {/* Sold Car Modal */}
+      {isSoldModalOpen && selectedCar && (
+        <div className="modal-overlay" onClick={() => setIsSoldModalOpen(false)}>
+            <div className="modal-content-large" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h2>Record Sale: {selectedCar.brand} {selectedCar.model}</h2>
+                    <button className="modal-close-btn" onClick={() => setIsSoldModalOpen(false)}>
+                        <CloseIcon fill="currentColor" />
+                    </button>
+                </div>
+                <form onSubmit={handleSoldSubmit}>
+                    <div className="modal-body">
+                        <div className="detail-section">
+                            <h3>Buyer Information</h3>
+                            <div className="form-grid-2">
+                                <div className="form-group">
+                                    <label className="form-label">Buyer Name</label>
+                                    <input type="text" name="buyerName" className="form-input" value={soldFormData.buyerName} onChange={handleSoldInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Email</label>
+                                    <input type="email" name="buyerEmail" className="form-input" value={soldFormData.buyerEmail} onChange={handleSoldInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Phone Number</label>
+                                    <input type="tel" name="buyerPhone" className="form-input" value={soldFormData.buyerPhone} onChange={handleSoldInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Address</label>
+                                    <input type="text" name="buyerAddress" className="form-input" value={soldFormData.buyerAddress} onChange={handleSoldInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">District</label>
+                                    <input type="text" name="buyerDistrict" className="form-input" value={soldFormData.buyerDistrict} onChange={handleSoldInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">State</label>
+                                    <input type="text" name="buyerState" className="form-input" value={soldFormData.buyerState} onChange={handleSoldInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Country</label>
+                                    <input type="text" name="buyerCountry" className="form-input" value={soldFormData.buyerCountry} onChange={handleSoldInputChange} required />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="detail-section">
+                            <h3>Purchase Information</h3>
+                            <div className="form-grid-2">
+                                <div className="form-group">
+                                    <label className="form-label">Sale Price (₹)</label>
+                                    <input type="number" name="salePrice" className="form-input" value={soldFormData.salePrice} onChange={handleSoldInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Sale Date</label>
+                                    <input type="date" name="saleDate" className="form-input" value={soldFormData.saleDate} onChange={handleSoldInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Payment Method</label>
+                                    <select name="paymentMethod" className="form-input" value={soldFormData.paymentMethod} onChange={handleSoldInputChange} required>
+                                        <option value="Cash">Cash</option>
+                                        <option value="Bank Transfer">Bank Transfer</option>
+                                        <option value="Cheque">Cheque</option>
+                                        <option value="Finance/Loan">Finance/Loan</option>
+                                    </select>
+                                </div>
+                                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                                    <label className="form-label">Additional Notes</label>
+                                    <textarea name="additionalNotes" className="form-textarea" value={soldFormData.additionalNotes} onChange={handleSoldInputChange} style={{ minHeight: '80px' }}></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="modal-footer" style={{ padding: '24px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                        <button type="button" className="btn-secondary" onClick={() => setIsSoldModalOpen(false)}>
+                            Cancel
+                        </button>
+                        <button type="submit" className="btn-primary" style={{ backgroundColor: '#10b981', color: 'white', padding: '10px 24px', borderRadius: '8px', border: 'none', fontWeight: '600' }}>
+                            Confirm Sale
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
       )}

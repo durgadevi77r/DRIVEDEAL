@@ -418,14 +418,44 @@ input[type="date"] {
   color: #ffffff !important;
 }
 
+.navbar .icon-btn {
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .navbar .icon-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
   color: #60a5fa !important;
+  transform: translateY(-2px);
+  border-color: #60a5fa;
+}
+
+.navbar .icon-btn .icon-svg.large-icon {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .navbar .icon-btn:hover .icon-svg {
   fill: #60a5fa !important;
   color: #60a5fa !important;
+}
+
+.navbar .navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-shrink: 0;
 }
 
 .navbar .btn-login {
@@ -966,6 +996,145 @@ input[type="date"] {
   }
 }
 
+/* Google Translate Custom Styling */
+.google-translate-container {
+  display: flex;
+  align-items: center;
+  margin: 0 10px;
+}
+
+/* Force the gadget container to be transparent */
+.goog-te-gadget {
+  font-family: var(--font-body) !important;
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+/* Hide the powered by logo and text */
+.goog-logo-link, 
+.goog-te-gadget span,
+.goog-te-gadget-simple img,
+.goog-te-gadget-icon,
+.goog-te-menu-value span:nth-child(3),
+.goog-te-menu-value span:nth-child(5) {
+  display: none !important;
+}
+
+/* Style the button itself with high specificity */
+#google_translate_element .goog-te-gadget-simple {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 0 15px !important;
+  border-radius: 8px !important;
+  height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+  position: relative !important;
+}
+
+/* Add "Select Language" text to the button */
+#google_translate_element .goog-te-gadget-simple::before {
+  content: "Select Language" !important;
+  color: #ffffff !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  margin-right: 8px !important;
+  font-family: var(--font-body) !important;
+}
+
+#google_translate_element .goog-te-gadget-simple:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: #60a5fa !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Style the text nodes inside the button */
+#google_translate_element .goog-te-menu-value,
+#google_translate_element .goog-te-menu-value:link,
+#google_translate_element .goog-te-menu-value:visited,
+#google_translate_element .goog-te-menu-value:hover,
+#google_translate_element .goog-te-menu-value:active {
+  color: #ffffff !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  text-decoration: none !important;
+}
+
+#google_translate_element .goog-te-menu-value span {
+  color: #ffffff !important;
+}
+
+/* Custom dropdown arrow for the button */
+#google_translate_element .goog-te-menu-value::after {
+  content: '▼' !important;
+  font-size: 0.7rem !important;
+  margin-left: 8px !important;
+  color: #ffffff !important;
+}
+
+/* Iframe / Dropdown Menu Styling */
+iframe.goog-te-menu-frame {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #1f2937 !important;
+  top: 75px !important;
+  left: auto !important;
+  right: 20px !important;
+}
+
+.goog-te-menu2 {
+  background-color: #1f2937 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 8px !important;
+  border-radius: 12px !important;
+  max-width: 250px !important;
+}
+
+.goog-te-menu2-item div {
+  background-color: transparent !important;
+  padding: 10px 16px !important;
+  border-radius: 6px !important;
+  color: #f9fafb !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.95rem !important;
+  cursor: pointer !important;
+}
+
+.goog-te-menu2-item:hover div {
+  background-color: rgba(96, 165, 250, 0.1) !important;
+  color: #60a5fa !important;
+}
+
+.goog-te-menu2-item-selected div {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.goog-te-menu2-item table, 
+.goog-te-menu2-item td {
+  border: none !important;
+}
+
+/* Hide the top banner from Google */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
 /* Media Queries for Navbar */
 @media (max-width: 1024px) {
   .navbar-container {
@@ -1333,27 +1502,12 @@ input[type="date"] {
 .dropdown-item {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.25rem;
   text-decoration: none;
   color: var(--text-primary);
-  font-size: 0.9rem;
-  transition: var(--transition);
-  cursor: pointer;
-  width: 100%;
-  background: none;
-  border: none;
-  text-align: left;
-}
-.dropdown-item1 {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  margin-right: 100px;
-  text-decoration: none;
-  color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   transition: var(--transition);
   cursor: pointer;
   width: 100%;
@@ -1365,6 +1519,7 @@ input[type="date"] {
 .dropdown-item:hover {
   background-color: var(--bg-hover);
   color: var(--primary-color);
+  padding-left: 1.5rem;
 }
 
 .dropdown-icon-svg {

@@ -6,6 +6,12 @@ export const WishlistIcon = ({ className = '', fill = 'currentColor' }) => (
   </svg>
 );
 
+export const WishlistFillIcon = ({ className = '', fill = 'currentColor' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill={fill} className={className}>
+    <path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z" />
+  </svg>
+);
+
 export const LogoutIcon = ({ className = '', fill = 'currentColor' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill={fill} className={className}>
     <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
@@ -157,5 +163,11 @@ export const MoonIcon = ({ className = '', fill = 'currentColor' }) => (
 export const CalendarIcon = ({ className = '', fill = 'currentColor' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill={fill} className={className}>
     <path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Z" />
+  </svg>
+);
+
+export const ShareIcon = ({ className = '', fill = 'currentColor' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill={fill} className={className}>
+    <path d="M720-80q-50 0-85-35t-35-85q0-7 1-14.5t3-13.5L322-392q-17 15-38 23.5t-44 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q23 0 44 8.5t38 23.5l282-164q-2-6-3-13.5t-1-14.5q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-23 0-44-8.5t-38-23.5L382-480q2-6 3-13.5t1-14.5q0-7-1-14.5t-3-13.5l282-164q17 15 38 23.5t44 8.5q50 0 85 35t35 85q0 50-35 85t-85 35q-23 0-44-8.5t-38-23.5L382-480l282 164q17-15 38-23.5t44-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Z" />
   </svg>
 );

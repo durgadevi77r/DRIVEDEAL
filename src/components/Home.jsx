@@ -155,9 +155,9 @@ const Home = () => {
             {t('heroSubtitle')}
           </motion.p>
           <motion.div className="hero-cta" variants={fadeInUp}>
-            <a href="#cars" className="btn btn-primary">
+            <button onClick={() => navigate('/cars')} className="btn btn-primary">
               {t('viewCars')}
-            </a>
+            </button>
             <a href="#book-visit" className="btn btn-secondary">
               {t('bookVisit')}
             </a>
@@ -166,7 +166,7 @@ const Home = () => {
       </section>
 
       {/* About / Trust Section */}
-      <section className="about-section">
+      <section className="about-section" id="about">
         <div className="container">
           <motion.div 
             className="about-content-wrapper"
@@ -185,8 +185,12 @@ const Home = () => {
               ></dotlottie-wc>
             </motion.div>
             <motion.div className="about-text-content" variants={fadeInUp}>
-              <h2 className="section-title">{t('aboutTitle')}</h2>
-              <p className="section-description">{t('aboutDescription')}</p>
+              <h2 className="section-title">About AP Auto Care</h2>
+              <p className="section-description">
+                Owned by <strong>Vignesh T</strong>, AP Auto Care is a premier second-hand car marketplace with <strong>10+ years of expertise</strong> in providing quality vehicles. 
+                Located near the New Bus Stand in Perundurai, we pride ourselves on transparency, trust, and exceptional customer service. 
+                Whether you are looking to buy your first car or upgrade to a premium model, our decade of experience ensures you get the best deal and a reliable vehicle.
+              </p>
             </motion.div>
           </motion.div>
           
@@ -198,10 +202,10 @@ const Home = () => {
             variants={staggerContainer}
           >
             {[
-              { title: 'yearsExperience', value: '15+' },
+              { title: 'yearsExperience', value: '10+' },
               { title: 'qualityChecked', value: '100%' },
               { title: 'transparentPricing', value: 'No Hidden Costs' },
-              { title: 'trustedSellers', value: 'Verified' }
+              { title: 'trustedSellers', value: 'Vignesh T' }
             ].map((feature, index) => (
               <motion.div key={index} className="trust-feature" variants={fadeInUp}>
                 <div className="trust-icon">✓</div>
@@ -439,9 +443,9 @@ const Home = () => {
             
             {/* 3 Buttons Side by Side */}
             <div className="cta-buttons">
-              <a href="#cars" className="btn btn-primary btn-large">
+              <button onClick={() => navigate('/cars')} className="btn btn-primary btn-large">
                 {t('exploreCars')} {/* View Cars */}
-              </a>
+              </button>
               <a href="#book-visit" className="btn btn-secondary btn-large">
                 {t('bookVisit')}
               </a>

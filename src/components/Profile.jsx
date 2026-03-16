@@ -25,6 +25,9 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [enquiries, setEnquiries] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const hasChanges = useMemo(() => {
     if (!initialData) return false;
@@ -103,18 +106,26 @@ const Profile = () => {
   };
 
   const fetchUserActivity = async () => {
-    if (!user?.email) return;
+    if (!user?.email || !user?._id) return;
     try {
-      const [enqRes, bookingRes] = await Promise.all([
+      const [enqRes, bookingRes, wishlistRes] = await Promise.all([
         fetch(`${API_BASE}/api/enquiries?email=${encodeURIComponent(user.email)}`),
         fetch(`${API_BASE}/api/bookings?email=${encodeURIComponent(user.email)}`),
+        fetch(`${API_BASE}/api/wishlist/${user._id}`),
       ]);
-      const [enqData, bookingData] = await Promise.all([enqRes.json(), bookingRes.json()]);
+      const [enqData, bookingData, wishlistData] = await Promise.all([
+        enqRes.json(),
+        bookingRes.json(),
+        wishlistRes.json()
+      ]);
       if (enqData.success && Array.isArray(enqData.data)) {
         setEnquiries(enqData.data);
       }
       if (bookingData.success && Array.isArray(bookingData.data)) {
         setBookings(bookingData.data);
+      }
+      if (wishlistData.success && Array.isArray(wishlistData.data)) {
+        setWishlistCount(wishlistData.data.length);
       }
     } catch {
       // fail silently; activity is non-critical
@@ -180,27 +191,109 @@ const Profile = () => {
     );
   }
 
+  const handleViewInfo = (item, type) => {
+    setSelectedItem({ ...item, type });
+    setShowModal(true);
+  };
+
   return (
     <div className="profile-page">
       <div className="profile-container">
-        <div className="profile-edit-header">
-          <div>
+        {/* Detail Modal */}
+        {showModal && selectedItem && (
+          <div className="detail-modal-overlay" onClick={() => setShowModal(false)}>
+            <div className="detail-modal-content" onClick={e => e.stopPropagation()}>
+              <div className="detail-modal-header">
+                <h2>{selectedItem.type === 'enquiry' ? 'Enquiry Details' : 'Booking Details'}</h2>
+                <button className="detail-modal-close" onClick={() => setShowModal(false)}>×</button>
+              </div>
+              <div className="detail-list">
+                {selectedItem.type === 'enquiry' ? (
+                  <>
+                    <div className="detail-row">
+                      <span className="label">Car / Interest</span>
+                      <span className="value">
+                        {selectedItem.preferredBrand || selectedItem.preferredModel
+                          ? `${selectedItem.preferredBrand || ''} ${selectedItem.preferredModel || ''}`.trim()
+                          : 'General enquiry'}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Budget Range</span>
+                      <span className="value">{selectedItem.budgetRange || 'Not specified'}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Message</span>
+                      <div className="value description">{selectedItem.message}</div>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Status</span>
+                      <span className={`status-pill status-${selectedItem.status.toLowerCase()}`}>
+                        {selectedItem.status}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="detail-row">
+                      <span className="label">Vehicle</span>
+                      <span className="value">
+                        {selectedItem.carId ? `${selectedItem.carId.brand} ${selectedItem.carId.model}` : 'N/A'}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Visit Schedule</span>
+                      <span className="value">
+                        {new Date(selectedItem.visitDate).toLocaleDateString()} at {selectedItem.visitTime}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Payment Preference</span>
+                      <span className="value">{selectedItem.paymentPreference}</span>
+                    </div>
+                    {selectedItem.initialAmount && (
+                      <div className="detail-row">
+                        <span className="label">Initial Amount</span>
+                        <span className="value">₹{selectedItem.initialAmount.toLocaleString()}</span>
+                      </div>
+                    )}
+                    <div className="detail-row">
+                      <span className="label">Booking Status</span>
+                      <span className={`status-pill status-${selectedItem.status.toLowerCase()}`}>
+                        {selectedItem.status}
+                      </span>
+                    </div>
+                  </>
+                )}
+                <div className="detail-row">
+                  <span className="label">Date Submitted</span>
+                  <span className="value">
+                    {new Date(selectedItem.createdAt || selectedItem.bookingDate).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Header Section */}
+        <div className="profile-dashboard-header">
+          <div className="header-info">
             <h1 className="profile-title">{t('yourProfile')}</h1>
             <p className="profile-subtitle">
               {t('editProfileSubtitle') || 'View and edit your account information'}
             </p>
           </div>
-          <div className="profile-edit-actions">
-            {!isEditing && (
+          <div className="header-actions">
+            {!isEditing ? (
               <button
                 type="button"
                 className="profile-edit-btn"
                 onClick={() => setIsEditing(true)}
               >
-                Edit
+                Edit Profile
               </button>
-            )}
-            {isEditing && (
+            ) : (
               <button
                 type="button"
                 className="profile-cancel-btn"
@@ -216,36 +309,60 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="profile-layout">
-          <form className="profile-form" onSubmit={handleSubmit}>
-            <div className="profile-form-grid">
-              <div className="profile-field">
-                <label htmlFor="firstName">{t('firstName')}</label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  placeholder={t('firstName')}
-                  readOnly={!isEditing}
-                  className={!isEditing ? 'profile-input-readonly' : ''}
-                />
+        {/* Stats Section */}
+        <div className="profile-stats-row">
+          <div className="stat-card">
+            <div className="stat-value">{enquiries.length}</div>
+            <div className="stat-label">Enquiries</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{bookings.length}</div>
+            <div className="stat-label">Bookings</div>
+          </div>
+          <div 
+            className="stat-card clickable" 
+            onClick={() => navigate('/wishlist')}
+          >
+            <div className="stat-value">{wishlistCount}</div>
+            <div className="stat-label">Wishlist</div>
+          </div>
+        </div>
+
+        <div className="profile-main-grid">
+          {/* Left Column: Form */}
+          <div className="profile-card info-section">
+            <h2 className="section-title">Personal Information</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="form-row-2">
+                <div className="profile-field">
+                  <label htmlFor="firstName">{t('firstName')}</label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder={t('firstName')}
+                    readOnly={!isEditing}
+                    className={!isEditing ? 'profile-input-readonly' : ''}
+                  />
+                </div>
+                <div className="profile-field">
+                  <label htmlFor="lastName">{t('lastName')}</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder={t('lastName')}
+                    readOnly={!isEditing}
+                    className={!isEditing ? 'profile-input-readonly' : ''}
+                  />
+                </div>
               </div>
+
               <div className="profile-field">
-                <label htmlFor="lastName">{t('lastName')}</label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  placeholder={t('lastName')}
-                  readOnly={!isEditing}
-                  className={!isEditing ? 'profile-input-readonly' : ''}
-                />
-              </div>
-              <div className="profile-field profile-field-full">
                 <label htmlFor="email">{t('email')}</label>
                 <input
                   type="email"
@@ -254,13 +371,13 @@ const Profile = () => {
                   value={formData.email}
                   readOnly
                   className="profile-input-readonly"
-                  aria-readonly="true"
                 />
-                <span className="profile-field-hint">
+                <span className="field-hint">
                   {t('emailNotEditable') || 'Email cannot be changed'}
                 </span>
               </div>
-              <div className="profile-field profile-field-full">
+
+              <div className="profile-field">
                 <label htmlFor="phone">{t('phone')}</label>
                 <input
                   type="tel"
@@ -273,7 +390,8 @@ const Profile = () => {
                   className={!isEditing ? 'profile-input-readonly' : ''}
                 />
               </div>
-              <div className="profile-field profile-field-full">
+
+              <div className="profile-field">
                 <label htmlFor="location">{t('location')}</label>
                 <input
                   type="text"
@@ -286,94 +404,98 @@ const Profile = () => {
                   className={!isEditing ? 'profile-input-readonly' : ''}
                 />
               </div>
+
+              {message.text && (
+                <div className={`profile-message message-${message.type}`}>
+                  {message.text}
+                </div>
+              )}
+
+              {isEditing && (
+                <button
+                  type="submit"
+                  className="profile-save-btn"
+                  disabled={saving || !hasChanges}
+                >
+                  {saving ? (t('saving') || 'Saving...') : t('save')}
+                </button>
+              )}
+            </form>
+          </div>
+
+          {/* Right Column: Activity Summary */}
+          <div className="profile-activity-column">
+            <div className="profile-card activity-section">
+              <h2 className="section-title">Enquiries</h2>
+              {enquiries.length === 0 ? (
+                <div className="empty-state">
+                  <p>You have not submitted any enquiries yet.</p>
+                </div>
+              ) : (
+                <div className="activity-list">
+                  {enquiries.map((enq) => (
+                    <div key={enq._id} className="activity-item">
+                      <div className="activity-info">
+                        <span className="activity-name">
+                          {enq.preferredBrand || enq.preferredModel
+                            ? `${enq.preferredBrand || ''} ${enq.preferredModel || ''}`.trim()
+                            : 'General enquiry'}
+                        </span>
+                        <span className="activity-date">
+                          {new Date(enq.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="activity-actions">
+                        <span className={`status-pill status-${enq.status.toLowerCase()}`}>
+                          {enq.status}
+                        </span>
+                        <button 
+                          className="btn-view-info"
+                          onClick={() => handleViewInfo(enq, 'enquiry')}
+                        >
+                          View Info
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {message.text && (
-              <div className={`profile-message profile-message-${message.type}`}>
-                {message.text}
-              </div>
-            )}
-
-            {isEditing && (
-              <button
-                type="submit"
-                className="profile-save-btn"
-                disabled={saving || !hasChanges}
-              >
-                {saving ? (t('saving') || 'Saving...') : t('save')}
-              </button>
-            )}
-          </form>
-
-          <div className="profile-section">
-            <h2 className="profile-section-title">Your Enquiries</h2>
-            {enquiries.length === 0 ? (
-              <p className="profile-activity-empty">You have not submitted any enquiries yet.</p>
-            ) : (
-              <div className="profile-activity-list">
-                {enquiries.map((enq) => (
-                  <div key={enq._id} className="profile-activity-card">
-                    <div className="profile-activity-title">
-                      {enq.preferredBrand || enq.preferredModel
-                        ? `${enq.preferredBrand || ''} ${enq.preferredModel || ''}`.trim()
-                        : 'General enquiry'}
-                    </div>
-                    <div className="profile-activity-meta">
-                      <span>Status: {enq.status}</span>
-                      <span>
-                        Date:{' '}
-                        {new Date(enq.createdAt).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </span>
-                      {enq.city && <span>City: {enq.city}</span>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <h2 className="profile-section-title" style={{ marginTop: '1.5rem' }}>
-              Your Bookings
-            </h2>
-            {bookings.length === 0 ? (
-              <p className="profile-activity-empty">You have not booked any cars yet.</p>
-            ) : (
-              <div className="profile-activity-list">
-                {bookings.map((b) => (
-                  <div key={b._id} className="profile-activity-card">
-                    <div className="profile-activity-title">
-                      {b.carId
-                        ? `${b.carId.brand} ${b.carId.model} (${b.carId.year})`
-                        : 'Car booking'}
-                    </div>
-                    <div className="profile-activity-meta">
-                      <span>Status: {b.status}</span>
-                      <span>
-                        Booked on:{' '}
-                        {new Date(b.bookingDate).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </span>
-                      {b.visitDate && (
-                        <span>
-                          Visit:{' '}
-                          {new Date(b.visitDate).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
+            <div className="profile-card activity-section">
+              <h2 className="section-title">Bookings</h2>
+              {bookings.length === 0 ? (
+                <div className="empty-state">
+                  <p>You have not booked any cars yet.</p>
+                </div>
+              ) : (
+                <div className="activity-list">
+                  {bookings.map((b) => (
+                    <div key={b._id} className="activity-item">
+                      <div className="activity-info">
+                        <span className="activity-name">
+                          {b.carId ? `${b.carId.brand} ${b.carId.model}` : 'Car booking'}
                         </span>
-                      )}
+                        <span className="activity-date">
+                          {new Date(b.bookingDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="activity-actions">
+                        <span className={`status-pill status-${b.status.toLowerCase()}`}>
+                          {b.status === 'Pending' ? 'Pending Approval' : b.status}
+                        </span>
+                        <button 
+                          className="btn-view-info"
+                          onClick={() => handleViewInfo(b, 'booking')}
+                        >
+                          View Info
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
