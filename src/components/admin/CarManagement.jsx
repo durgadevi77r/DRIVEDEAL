@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DeleteIcon, SearchIcon, FilterIcon, CloseIcon, CalendarIcon } from '../Icons';
 import { Reorder } from 'framer-motion';
+import API_BASE_URL from '../../config';
 
 const CarManagement = () => {
   const [cars, setCars] = useState([]);
@@ -51,7 +52,7 @@ const CarManagement = () => {
   const fetchCars = async () => {
     try {
       setError(null);
-      const response = await fetch('http://localhost:5000/api/cars');
+      const response = await fetch(`${API_BASE_URL}/api/cars`);
       const data = await response.json();
       if (data.success) {
         setCars(data.data);
@@ -78,7 +79,7 @@ const CarManagement = () => {
             salePrice: Number(soldFormData.salePrice)
         };
 
-        const response = await fetch('http://localhost:5000/api/sold-cars', {
+        const response = await fetch(`${API_BASE_URL}/api/sold-cars`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -187,7 +188,7 @@ const CarManagement = () => {
     });
 
     try {
-      const response = await fetch('http://localhost:5000/api/cars', {
+      const response = await fetch(`${API_BASE_URL}/api/cars`, {
         method: 'POST',
         body: data // Don't set Content-Type header, let browser set it with boundary
       });
@@ -214,7 +215,7 @@ const CarManagement = () => {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/cars/${id}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/cars/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -231,7 +232,7 @@ const CarManagement = () => {
   const deleteCar = async (id) => {
       if(window.confirm('Are you sure you want to delete this car? This action cannot be undone.')) {
         try {
-            const response = await fetch(`http://localhost:5000/api/cars/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/api/cars/${id}`, {
                 method: 'DELETE'
             });
             const result = await response.json();
@@ -526,7 +527,7 @@ const CarManagement = () => {
                     <td>
                     {car.primaryImage ? (
                         <img 
-                            src={`http://localhost:5000/${car.primaryImage}`} 
+                            src={`${API_BASE_URL}/${car.primaryImage}`} 
                             alt="Car" 
                             style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '6px' }} 
                         />
@@ -603,7 +604,7 @@ const CarManagement = () => {
                                 selectedCar.images.map((img, index) => (
                                     <img 
                                         key={index} 
-                                        src={`http://localhost:5000/${img}`} 
+                                        src={`${API_BASE_URL}/${img}`} 
                                         alt={`Car view ${index + 1}`} 
                                         style={{ height: '150px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-color)' }} 
                                     />

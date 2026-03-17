@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { WishlistIcon, WishlistFillIcon, ShareIcon } from './Icons';
 import './CarDetails.css';
 import './Cars.css'; // Reuse card styles for related cars
+import API_BASE_URL from '../config';
 
 const CarDetails = () => {
   const { id } = useParams();
@@ -57,7 +58,7 @@ const CarDetails = () => {
 
   const checkBookingConfirmation = async () => {
     try {
-        const response = await fetch(`http://localhost:5000/api/bookings?carId=${car._id}`);
+        const response = await fetch(`${API_BASE_URL}/api/bookings?carId=${car._id}`);
         const data = await response.json();
         if (data.success) {
             const hasConfirmed = data.data.some(b => b.status === 'Accepted');
@@ -70,7 +71,7 @@ const CarDetails = () => {
 
   const fetchSoldInfo = async () => {
     try {
-        const response = await fetch(`http://localhost:5000/api/sold-cars/car/${car._id}`);
+        const response = await fetch(`${API_BASE_URL}/api/sold-cars/car/${car._id}`);
         const data = await response.json();
         if (data.success) {
             setSoldInfo(data.data);
@@ -83,7 +84,7 @@ const CarDetails = () => {
   const checkWishlistStatus = async () => {
     if (!user?._id) return;
     try {
-        const response = await fetch(`http://localhost:5000/api/wishlist/${user._id}`);
+        const response = await fetch(`${API_BASE_URL}/api/wishlist/${user._id}`);
         const data = await response.json();
         if (data.success) {
             const exists = data.data.some(item => (item.carId?._id || item.carId) === car._id);
@@ -109,13 +110,13 @@ const CarDetails = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:5000/${imagePath}`;
+    return `${API_BASE_URL}/${imagePath}`;
   };
 
   const fetchCarDetails = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/cars/${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/cars/${id}`);
       const data = await response.json();
       if (data.success) {
         setCar(data.data);
@@ -170,7 +171,7 @@ const CarDetails = () => {
             initialAmount: bookingData.paymentPreference === 'Initial Amount' ? Number(bookingData.initialAmount) : undefined
         };
 
-        const response = await fetch('http://localhost:5000/api/bookings', {
+        const response = await fetch(`${API_BASE_URL}/api/bookings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -217,7 +218,7 @@ const CarDetails = () => {
       try {
           if (isWishlisted) {
               // Remove from wishlist
-              const res = await fetch(`http://localhost:5000/api/wishlist/${user._id}/${car._id}`, {
+              const res = await fetch(`${API_BASE_URL}/api/wishlist/${user._id}/${car._id}`, {
                   method: 'DELETE'
               });
               const data = await res.json();
@@ -228,7 +229,7 @@ const CarDetails = () => {
               }
           } else {
               // Add to wishlist
-              const res = await fetch('http://localhost:5000/api/wishlist', {
+              const res = await fetch(`${API_BASE_URL}/api/wishlist`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ userId: user._id, carId: car._id })

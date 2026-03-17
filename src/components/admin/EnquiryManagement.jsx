@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { SearchIcon, FilterIcon, CloseIcon, CalendarIcon, DownloadIcon } from '../Icons';
+import API_BASE_URL from '../../config';
 
 const EnquiryManagement = () => {
   const [enquiries, setEnquiries] = useState([]);
@@ -39,7 +40,7 @@ const EnquiryManagement = () => {
 
   const fetchEnquiries = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/enquiries');
+      const response = await fetch(`${API_BASE_URL}/api/enquiries`);
       const data = await response.json();
       if (data.success) {
         // Sort by date descending (newest first)
@@ -51,6 +52,23 @@ const EnquiryManagement = () => {
       console.error('Error fetching enquiries:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteEnquiry = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this enquiry?')) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/enquiries/${id}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (data.success) {
+        setEnquiries(enquiries.filter((enq) => enq._id !== id));
+        setFilteredEnquiries(filteredEnquiries.filter((enq) => enq._id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting enquiry:', error);
     }
   };
 

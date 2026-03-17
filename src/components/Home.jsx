@@ -6,6 +6,8 @@ import FormSubmissionOverlay from './FormSubmissionOverlay';
 import { motion } from 'framer-motion';
 import './Home.css';
 
+import API_BASE_URL from '../config';
+
 const Home = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -55,14 +57,14 @@ const Home = () => {
     const fetchCars = async () => {
       try {
         // Fetch Recently Added (Available cars, sorted by date desc by default)
-        const addedResponse = await fetch('http://localhost:5000/api/cars');
+        const addedResponse = await fetch(`${API_BASE_URL}/api/cars`);
         const addedData = await addedResponse.json();
         if (addedData.success) {
           setRecentlyAddedCars(addedData.data.slice(0, 3));
         }
 
         // Fetch Recently Sold
-        const soldResponse = await fetch('http://localhost:5000/api/cars?status=sold');
+        const soldResponse = await fetch(`${API_BASE_URL}/api/cars?status=sold`);
         const soldData = await soldResponse.json();
         if (soldData.success) {
           setRecentlySoldCars(soldData.data.slice(0, 3));
@@ -80,7 +82,7 @@ const Home = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://via.placeholder.com/300x200?text=No+Image';
     if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:5000/${imagePath}`;
+    return `${API_BASE_URL}/${imagePath}`;
   };
 
   const formatPrice = (price) => {
@@ -106,7 +108,7 @@ const Home = () => {
     setShowSuccessOverlay(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -10,18 +10,19 @@ export const useAuth = () => {
   return context;
 };
 
+import API_BASE_URL from '../config';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    const savedIsAdmin = localStorage.getItem('isAdmin') === 'true';
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-      setIsAdmin(savedIsAdmin);
+    const storedUser = localStorage.getItem('user');
+    const storedIsAdmin = localStorage.getItem('isAdmin');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      setIsAdmin(storedIsAdmin === 'true');
     }
     setLoading(false);
   }, []);
@@ -35,7 +36,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     try {
-      const response = await fetch('http://localhost:5000/api/signup', {
+      const response = await fetch(`${API_BASE_URL}/api/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +56,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithEmailPassword = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +77,7 @@ export const AuthProvider = ({ children }) => {
 
   const adminLogin = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -99,13 +100,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('isAdmin');
   };
 
-  const updateUser = (userData) => {
-    if (userData) {
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-    }
-  };
-
   const loginWithGoogle = async () => {
     try {
       // Simulate Google login by calling the mock backend endpoint
@@ -113,7 +107,7 @@ export const AuthProvider = ({ children }) => {
         name: 'Google User',
         email: 'user@gmail.com',
       };
-      const response = await fetch('http://localhost:5000/api/login/google', {
+      const response = await fetch(`${API_BASE_URL}/api/login/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(googleData),

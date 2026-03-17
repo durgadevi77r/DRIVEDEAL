@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SearchIcon, CloseIcon, CalendarIcon } from '../Icons';
+import API_BASE_URL from '../../config';
 
 const SoldCarManagement = () => {
   const [soldCars, setSoldCars] = useState([]);
@@ -29,7 +30,7 @@ const SoldCarManagement = () => {
   const fetchSoldCars = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/sold-cars');
+      const response = await fetch(`${API_BASE_URL}/api/sold-cars`);
       const data = await response.json();
       if (data.success) {
         setSoldCars(data.data);
@@ -42,6 +43,23 @@ const SoldCarManagement = () => {
       setError('Failed to load sold car records');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteSoldCar = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this record?')) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/sold-cars/${id}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSoldCars(soldCars.filter((car) => car._id !== id));
+        setFilteredSoldCars(filteredSoldCars.filter((car) => car._id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting record:', error);
     }
   };
 

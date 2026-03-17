@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SearchIcon, CloseIcon, CalendarIcon } from '../Icons';
+import API_BASE_URL from '../../config';
 
 const BookingManagement = () => {
   const [bookings, setBookings] = useState([]);
@@ -30,7 +31,7 @@ const BookingManagement = () => {
 
   const fetchBookings = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/bookings');
+      const response = await fetch(`${API_BASE_URL}/api/bookings`);
       const data = await response.json();
       if (data.success) {
         // Sort by date descending
@@ -49,7 +50,7 @@ const BookingManagement = () => {
     if (!window.confirm(`Are you sure you want to set this booking to ${newStatus}?`)) return;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -427,7 +428,7 @@ const BookingManagement = () => {
                                 {selectedBooking.carId.primaryImage && (
                                     <div className="detail-item" style={{ gridColumn: '1 / -1' }}>
                                         <img 
-                                            src={`http://localhost:5000/${selectedBooking.carId.primaryImage}`} 
+                                            src={`${API_BASE_URL}/${selectedBooking.carId.primaryImage}`} 
                                             alt="Car" 
                                             style={{ width: '100%', maxWidth: '300px', borderRadius: '8px', marginTop: '8px' }}
                                         />

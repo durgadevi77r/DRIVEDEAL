@@ -2,9 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import API_BASE_URL from '../config';
 import './Profile.css';
-
-const API_BASE = 'http://localhost:5000';
 
 const Profile = () => {
   const { user, isAuthenticated, updateUser } = useAuth();
@@ -63,7 +62,7 @@ const Profile = () => {
     if (!user?.email) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/users/profile?email=${encodeURIComponent(user.email)}`);
+      const res = await fetch(`${API_BASE_URL}/api/users/profile?email=${encodeURIComponent(user.email)}`);
       const data = await res.json();
       if (data.success && data.user) {
         const u = data.user;
@@ -109,9 +108,9 @@ const Profile = () => {
     if (!user?.email || !user?._id) return;
     try {
       const [enqRes, bookingRes, wishlistRes] = await Promise.all([
-        fetch(`${API_BASE}/api/enquiries?email=${encodeURIComponent(user.email)}`),
-        fetch(`${API_BASE}/api/bookings?email=${encodeURIComponent(user.email)}`),
-        fetch(`${API_BASE}/api/wishlist/${user._id}`),
+        fetch(`${API_BASE_URL}/api/enquiries?email=${encodeURIComponent(user.email)}`),
+        fetch(`${API_BASE_URL}/api/bookings?email=${encodeURIComponent(user.email)}`),
+        fetch(`${API_BASE_URL}/api/wishlist/${user._id}`),
       ]);
       const [enqData, bookingData, wishlistData] = await Promise.all([
         enqRes.json(),
@@ -153,7 +152,7 @@ const Profile = () => {
       phone: formData.phone.trim(),
     };
     try {
-      const res = await fetch(`${API_BASE}/api/users/profile`, {
+      const res = await fetch(`${API_BASE_URL}/api/users/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -6,6 +6,8 @@ import { WishlistFillIcon, DeleteIcon, AvailableIcon, SoldIcon, BookedIcon } fro
 import './Cars.css';
 import './Wishlist.css';
 
+import API_BASE_URL from '../config';
+
 const Wishlist = () => {
     const navigate = useNavigate();
     const { user, isAuthenticated } = useAuth();
@@ -24,7 +26,7 @@ const Wishlist = () => {
     const fetchWishlist = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5000/api/wishlist/${user._id}`);
+            const response = await fetch(`${API_BASE_URL}/api/wishlist/${user._id}`);
             const data = await response.json();
             if (data.success) {
                 setWishlistItems(data.data);
@@ -38,7 +40,7 @@ const Wishlist = () => {
 
     const removeFromWishlist = async (carId) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/wishlist/${user._id}/${carId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/wishlist/${user._id}/${carId}`, {
                 method: 'DELETE'
             });
             const data = await response.json();
@@ -53,7 +55,7 @@ const Wishlist = () => {
     const getImageUrl = (imagePath) => {
         if (!imagePath) return 'https://via.placeholder.com/400x250?text=No+Image';
         if (imagePath.startsWith('http')) return imagePath;
-        return `http://localhost:5000/${imagePath}`;
+        return `${API_BASE_URL}/${imagePath}`;
     };
 
     const formatPrice = (price) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import API_BASE_URL from '../config';
 import './Cars.css';
 import { FilterIcon, WishlistIcon, WishlistFillIcon } from './Icons';
 
@@ -56,7 +57,7 @@ const Cars = () => {
 
   const fetchWishlist = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/wishlist/${user._id}`);
+      const response = await fetch(`${API_BASE_URL}/api/wishlist/${user._id}`);
       const data = await response.json();
       if (data.success) {
         setWishlist(data.data.map(item => item.carId._id || item.carId));
@@ -76,7 +77,7 @@ const Cars = () => {
     const isWishlisted = wishlist.includes(carId);
     try {
       if (isWishlisted) {
-        const res = await fetch(`http://localhost:5000/api/wishlist/${user._id}/${carId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/wishlist/${user._id}/${carId}`, {
           method: 'DELETE'
         });
         const data = await res.json();
@@ -84,7 +85,7 @@ const Cars = () => {
           setWishlist(prev => prev.filter(id => id !== carId));
         }
       } else {
-        const res = await fetch('http://localhost:5000/api/wishlist', {
+        const res = await fetch(`${API_BASE_URL}/api/wishlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user._id, carId })
@@ -101,7 +102,7 @@ const Cars = () => {
 
   const fetchFilterOptions = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/cars/filters');
+      const response = await fetch(`${API_BASE_URL}/api/cars/filters`);
       const data = await response.json();
       if (data.success) {
         setFilterOptions(data.data);
@@ -131,7 +132,7 @@ const Cars = () => {
       if (filters.kmMin) queryParams.append('kmMin', filters.kmMin);
       if (filters.kmMax) queryParams.append('kmMax', filters.kmMax);
 
-      const response = await fetch(`http://localhost:5000/api/cars?${queryParams.toString()}`);
+      const response = await fetch(`${API_BASE_URL}/api/cars?${queryParams.toString()}`);
       const data = await response.json();
       if (data.success) {
         setCars(data.data);
@@ -334,7 +335,7 @@ const Cars = () => {
                   >
                     <div className="car-image-container">
                       <img 
-                        src={car.primaryImage ? `http://localhost:5000/${car.primaryImage}` : 'https://via.placeholder.com/300x200?text=No+Image'} 
+                        src={car.primaryImage ? `${API_BASE_URL}/${car.primaryImage}` : 'https://via.placeholder.com/300x200?text=No+Image'} 
                         alt={`${car.brand} ${car.model}`} 
                         className="car-image"
                         loading="lazy"
