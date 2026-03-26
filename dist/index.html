@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DRIVEDEAL - Smart Second-Hand Car Sales</title>
+    <title> - Smart Second-Hand Car Sales</title>
     <meta name="description" content="Trusted Used Cars. Transparent Deals. Smart Choices." />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href="/DRIVEDEAL/favicon.ico" />
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,12 +15,43 @@
     <style>
       /* Basic reset to minimize flash of unstyled content */
       html, body, #root { height: 100%; }
-      body { margin: 0; font-family: "Cormorant Garamond", serif; background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); }
+      body { margin: 0; font-family: "Cormorant Garamond", serif; }
+
+      /* Force Google Translate Styles here too as a backup */
+      #google_translate_element .goog-te-gadget-simple {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        padding: 0 15px !important;
+        border-radius: 8px !important;
+        height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+      }
+      #google_translate_element .goog-te-menu-value span {
+        color: #ffffff !important;
+        font-family: 'Inter', sans-serif !important;
+      }
+      .goog-te-banner-frame { display: none !important; }
+      body { top: 0 !important; }
     </style>
-    <script type="module" crossorigin src="/assets/index-BQPLM95R.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CFcHHVF0.css">
+    <script type="module" crossorigin src="/DRIVEDEAL/assets/index-IsPstrfo.js"></script>
+    <link rel="stylesheet" crossorigin href="/DRIVEDEAL/assets/index-FRdRaNp_.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+          pageLanguage: 'en',
+          includedLanguages: 'en,ta,ml,kn,te,hi',
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false,
+          multilanguagePage: true
+        }, 'google_translate_element');
+      }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   </body>
 </html>

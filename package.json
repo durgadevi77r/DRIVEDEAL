@@ -11,6 +11,9 @@
   "author": "",
   "license": "ISC",
   "description": "Smart Second-Hand Car Sales Management System",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.2",
     "vite": "^7.3.0"
