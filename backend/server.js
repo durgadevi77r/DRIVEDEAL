@@ -51,9 +51,15 @@ const emailTransporter = createEmailTransporter();
 const enquiryRateLimit = new Map();
 
 // Ensure uploads directory exists
-const uploadDir = path.join(__dirname, 'uploads');
+const isVercel = process.env.VERCEL === '1';
+const uploadDir = isVercel ? '/tmp/uploads' : path.join(__dirname, 'uploads');
+
 if (!fs.existsSync(uploadDir)){
-    fs.mkdirSync(uploadDir);
+    try {
+        fs.mkdirSync(uploadDir, { recursive: true });
+    } catch (err) {
+        console.error('Error creating upload directory:', err);
+    }
 }
 
 // Middleware
@@ -63,12 +69,12 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadDir));
 
 // Multer Configuration for Image Upload
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/')
+    cb(null, uploadDir)
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname)
@@ -88,10 +94,28 @@ const upload = multer({
 });
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/drivedeal';
-mongoose.connect(MONGODB_URI)
-.then(() => console.log('✅ MongoDB Connected successfully'))
-.catch(err => console.error('❌ MongoDB Connection Error:', err));
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI && !isVercel) {
+    console.warn('⚠️  MONGODB_URI not found. Falling back to localhost.');
+}
+
+const connectDB = async () => {
+    if (mongoose.connection.readyState >= 1) return;
+    try {
+         await mongoose.connect(MONGODB_URI || 'mongodb://127.0.0.1:27017/drivedeal', {
+             serverSelectionTimeoutMS: 5000, // Timeout after 5s
+             socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+         });
+         console.log('✅ MongoDB Connected successfully');
+    } catch (err) {
+        console.error('❌ MongoDB Connection Error:', err);
+        if (isVercel) throw err; // Re-throw in Vercel to fail the invocation early
+    }
+};
+
+// Connect to DB immediately
+connectDB();
+
 
 // Mongoose Schemas and Models
 
@@ -1237,6 +1261,11 @@ app.delete('/api/compare/:userId/:carId', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Backend server running on http://localhost:${PORT}`);
-});
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Backend server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
+
