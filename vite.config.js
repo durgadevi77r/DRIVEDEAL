@@ -4,6 +4,9 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({ 
   plugins: [react()],
   base: process.env.VITE_BASE_PATH || "/",
+  build: {
+    chunkSizeWarningLimit: 2000,
+  },
   server: {
     port: 5173,
     host: 'localhost',

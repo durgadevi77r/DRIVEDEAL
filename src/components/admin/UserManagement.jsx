@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SearchIcon, CloseIcon, CalendarIcon } from '../Icons';
+import API_BASE_URL from '../../config';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -24,7 +25,7 @@ const UserManagement = () => {
     try {
       setError(null);
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/users');
+      const response = await fetch(`${API_BASE_URL}/api/users`);
       const data = await response.json();
       if (data.success) {
         setUsers(data.data);

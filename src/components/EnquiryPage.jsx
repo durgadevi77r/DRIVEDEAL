@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import FormSubmissionOverlay from './FormSubmissionOverlay';
+import API_BASE_URL from '../config';
 import './EnquiryPage.css';
 
 const EnquiryPage = () => {
@@ -71,7 +72,7 @@ const EnquiryPage = () => {
     setShowSuccessOverlay(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

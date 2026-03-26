@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import API_BASE_URL from '../config';
 
 const AuthContext = createContext();
 
@@ -9,8 +10,6 @@ export const useAuth = () => {
   }
   return context;
 };
-
-import API_BASE_URL from '../config';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -98,6 +97,11 @@ export const AuthProvider = ({ children }) => {
     setIsAdmin(false);
     localStorage.removeItem('user');
     localStorage.removeItem('isAdmin');
+  };
+
+  const updateUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const loginWithGoogle = async () => {
